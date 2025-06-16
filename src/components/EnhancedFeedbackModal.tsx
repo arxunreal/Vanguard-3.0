@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Edit3, Trash2, Save, AlertCircle, Upload } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { GoogleLensSection } from './GoogleLensSection'
+import { EnhancedGoogleLensSection } from './EnhancedGoogleLensSection'
 import { parseFeedbackText, ParsedFeedback } from '../utils/textParsing'
 
 interface EnhancedFeedbackModalProps {
@@ -267,7 +267,7 @@ export const EnhancedFeedbackModal: React.FC<EnhancedFeedbackModalProps> = ({
                     variants={buttonVariants}
                     whileHover="hover"
                     whileTap="tap"
-                    title="Use Google Lens"
+                    title="Use AI Text Extraction"
                   >
                     <Upload className="w-5 h-5" />
                   </motion.button>
@@ -295,7 +295,7 @@ export const EnhancedFeedbackModal: React.FC<EnhancedFeedbackModalProps> = ({
               </div>
             </div>
 
-            {/* Google Lens Section */}
+            {/* Enhanced Google Lens Section */}
             <AnimatePresence>
               {showGoogleLens && !editingFeedback && (
                 <motion.div
@@ -304,7 +304,7 @@ export const EnhancedFeedbackModal: React.FC<EnhancedFeedbackModalProps> = ({
                   exit={{ opacity: 0, height: 0 }}
                   className="mb-8"
                 >
-                  <GoogleLensSection onTextExtracted={handleTextExtracted} />
+                  <EnhancedGoogleLensSection onTextExtracted={handleTextExtracted} />
                 </motion.div>
               )}
             </AnimatePresence>
