@@ -5,6 +5,65 @@ export interface OCRService {
   isAvailable: () => boolean
 }
 
+// OCR.space API integration
+export class OCRSpaceOCR implements OCRService {
+  name = 'OCR.space'
+  private apiKey: string
+
+  constructor(apiKey?: string) {
+    this.apiKey = apiKey || import.meta.env.VITE_OCRSPACE_API_KEY || ''
+  }
+
+  isAvailable(): boolean {
+    return !!this.apiKey
+  }
+
+  async extractText(imageFile: File): Promise<string> {
+    if (!this.isAvailable()) {
+      throw new Error('OCR.space API key not configured')
+    }
+
+    try {
+      const formData = new FormData()
+      formData.append('file', imageFile)
+      formData.append('apikey', this.apiKey)
+      formData.append('language', 'eng')
+      formData.append('isOverlayRequired', 'false')
+      formData.append('detectOrientation', 'true')
+      formData.append('isTable', 'true')
+      formData.append('scale', 'true')
+      formData.append('OCREngine', '2') // Use OCR Engine 2 for better accuracy
+
+      const response = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error(`OCR.space API error: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.IsErroredOnProcessing) {
+        throw new Error(`OCR.space processing error: ${result.ErrorMessage || 'Unknown error'}`)
+      }
+
+      if (result.ParsedResults && result.ParsedResults.length > 0) {
+        const extractedText = result.ParsedResults[0].ParsedText
+        if (extractedText && extractedText.trim()) {
+          return extractedText.trim()
+        }
+      }
+      
+      throw new Error('No text detected in image')
+    } catch (error) {
+      console.error('OCR.space error:', error)
+      throw error
+    }
+  }
+}
+
 // Google Cloud Vision API integration
 export class GoogleVisionOCR implements OCRService {
   name = 'Google Cloud Vision'

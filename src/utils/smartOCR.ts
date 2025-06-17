@@ -1,5 +1,5 @@
 import Tesseract from 'tesseract.js'
-import { GoogleVisionOCR, OpenAIVisionOCR, AzureVisionOCR, OCRService } from './externalOCR'
+import { GoogleVisionOCR, OpenAIVisionOCR, AzureVisionOCR, OCRSpaceOCR, OCRService } from './externalOCR'
 
 export interface OCRResult {
   text: string
@@ -14,11 +14,16 @@ export class SmartOCRManager {
 
   constructor() {
     // Initialize external services
+    const ocrSpace = new OCRSpaceOCR()
     const googleVision = new GoogleVisionOCR()
     const openAIVision = new OpenAIVisionOCR()
     const azureVision = new AzureVisionOCR()
 
     // Add available services in order of preference
+    // OCR.space first as it's specifically configured
+    if (ocrSpace.isAvailable()) {
+      this.services.push(ocrSpace)
+    }
     if (openAIVision.isAvailable()) {
       this.services.push(openAIVision)
     }
@@ -51,7 +56,7 @@ export class SmartOCRManager {
         
         return {
           text,
-          confidence: 0.95, // External services are generally high confidence
+          confidence: service.name === 'OCR.space' ? 0.92 : 0.95, // OCR.space gets high confidence
           service: service.name,
           processingTime
         }

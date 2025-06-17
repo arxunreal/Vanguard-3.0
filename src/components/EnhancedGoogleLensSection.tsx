@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, Image, CheckCircle, AlertCircle, X, Eye, Loader, Zap, Cloud, Cpu } from 'lucide-react'
+import { Upload, Image, CheckCircle, AlertCircle, X, Eye, Loader, Zap, Cloud, Cpu, Globe } from 'lucide-react'
 import { validateImageFile } from '../utils/textExtraction'
 import { smartOCR, OCRResult } from '../utils/smartOCR'
 
@@ -122,6 +122,7 @@ export const EnhancedGoogleLensSection: React.FC<EnhancedGoogleLensSectionProps>
   }
 
   const getServiceIcon = (serviceName: string) => {
+    if (serviceName.includes('OCR.space')) return <Globe className="w-4 h-4" />
     if (serviceName.includes('OpenAI')) return <Zap className="w-4 h-4" />
     if (serviceName.includes('Google')) return <Cloud className="w-4 h-4" />
     if (serviceName.includes('Azure')) return <Cloud className="w-4 h-4" />
@@ -184,9 +185,16 @@ export const EnhancedGoogleLensSection: React.FC<EnhancedGoogleLensSectionProps>
               <p className="text-yellow-800 text-sm">
                 💡 <strong>Tip:</strong> For better accuracy, configure external AI services in your environment variables:
                 <br />
-                <code className="text-xs bg-yellow-100 px-1 rounded">VITE_OPENAI_API_KEY</code>, 
-                <code className="text-xs bg-yellow-100 px-1 rounded ml-1">VITE_GOOGLE_VISION_API_KEY</code>, or 
-                <code className="text-xs bg-yellow-100 px-1 rounded ml-1">VITE_AZURE_VISION_API_KEY</code>
+                <code className="text-xs bg-yellow-100 px-1 rounded">VITE_OCRSPACE_API_KEY</code>, 
+                <code className="text-xs bg-yellow-100 px-1 rounded ml-1">VITE_OPENAI_API_KEY</code>, or 
+                <code className="text-xs bg-yellow-100 px-1 rounded ml-1">VITE_GOOGLE_VISION_API_KEY</code>
+              </p>
+            </div>
+          )}
+          {hasExternalServices && availableServices[0] === 'OCR.space' && (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
+              <p className="text-green-800 text-sm">
+                🎉 <strong>OCR.space API Active!</strong> You're using a premium OCR service for enhanced text recognition accuracy.
               </p>
             </div>
           )}
