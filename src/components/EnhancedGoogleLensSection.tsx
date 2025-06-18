@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, Image, CheckCircle, AlertCircle, X, Eye, Loader, Zap, Cloud, Cpu, Globe } from 'lucide-react'
+import { Upload, Image, CheckCircle, AlertCircle, X, Eye, Loader, Zap, Cloud, Cpu, Globe, Star } from 'lucide-react'
 import { validateImageFile } from '../utils/textExtraction'
 import { smartOCR, OCRResult } from '../utils/smartOCR'
 
@@ -20,6 +20,7 @@ export const EnhancedGoogleLensSection: React.FC<EnhancedGoogleLensSectionProps>
 
   const availableServices = smartOCR.getAvailableServices()
   const hasExternalServices = smartOCR.hasExternalServices()
+  const isOCRSpacePrimary = smartOCR.isPrimaryServiceOCRSpace()
 
   const handleTextSubmit = () => {
     if (extractedText.trim()) {
@@ -55,11 +56,11 @@ export const EnhancedGoogleLensSection: React.FC<EnhancedGoogleLensSectionProps>
             clearInterval(progressInterval)
             return 90
           }
-          return prev + 10
+          return prev + 15
         })
-      }, 300)
+      }, 200)
 
-      // Extract text using smart OCR
+      // Extract text using smart OCR (OCR.space first!)
       const result = await smartOCR.extractText(file)
       
       clearInterval(progressInterval)
@@ -122,7 +123,7 @@ export const EnhancedGoogleLensSection: React.FC<EnhancedGoogleLensSectionProps>
   }
 
   const getServiceIcon = (serviceName: string) => {
-    if (serviceName.includes('OCR.space')) return <Globe className="w-4 h-4" />
+    if (serviceName.includes('OCR.space')) return <Star className="w-4 h-4" />
     if (serviceName.includes('OpenAI')) return <Zap className="w-4 h-4" />
     if (serviceName.includes('Google')) return <Cloud className="w-4 h-4" />
     if (serviceName.includes('Azure')) return <Cloud className="w-4 h-4" />
@@ -157,47 +158,54 @@ export const EnhancedGoogleLensSection: React.FC<EnhancedGoogleLensSectionProps>
           <Eye className="w-10 h-10 text-blue-600" />
         </motion.div>
         
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">🤖 AI-Powered Text Extraction</h3>
+        <h3 className="text-2xl font-bold text-gray-900 mb-3">🚀 OCR.space AI Text Extraction</h3>
         <p className="text-gray-600 mb-4 max-w-lg mx-auto text-lg">
-          Upload an image and we'll automatically extract text using <span className="font-bold text-blue-600">advanced AI models</span>
+          Upload an image and we'll extract text using <span className="font-bold text-blue-600">OCR.space's premium AI</span>
         </p>
 
-        {/* Available Services Info */}
+        {/* OCR.space Status */}
         <div className="mb-6">
+          {isOCRSpacePrimary ? (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Star className="w-5 h-5 text-green-600" />
+                <span className="font-bold text-green-800">OCR.space API Active!</span>
+                <Star className="w-5 h-5 text-green-600" />
+              </div>
+              <p className="text-green-700 text-sm">
+                🎉 Your premium OCR.space service is configured and ready! This will provide superior text recognition accuracy.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+                <span className="font-bold text-red-800">OCR.space Not Configured</span>
+              </div>
+              <p className="text-red-700 text-sm">
+                ⚠️ OCR.space API key not found. Please check your .env file configuration.
+              </p>
+            </div>
+          )}
+
           <div className="flex flex-wrap justify-center gap-2 mb-3">
             {availableServices.map((service, index) => (
               <span 
                 key={service}
                 className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
-                  index === 0 && hasExternalServices
+                  service.includes('OCR.space')
                     ? 'bg-green-100 text-green-800 border border-green-300'
+                    : index === 0 && hasExternalServices
+                    ? 'bg-blue-100 text-blue-800 border border-blue-300'
                     : 'bg-gray-100 text-gray-700 border border-gray-300'
                 }`}
               >
                 {getServiceIcon(service)}
                 {service}
-                {index === 0 && hasExternalServices && <span className="ml-1">✨</span>}
+                {service.includes('OCR.space') && <Star className="w-3 h-3 ml-1" />}
               </span>
             ))}
           </div>
-          {!hasExternalServices && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-4">
-              <p className="text-yellow-800 text-sm">
-                💡 <strong>Tip:</strong> For better accuracy, configure external AI services in your environment variables:
-                <br />
-                <code className="text-xs bg-yellow-100 px-1 rounded">VITE_OCRSPACE_API_KEY</code>, 
-                <code className="text-xs bg-yellow-100 px-1 rounded ml-1">VITE_OPENAI_API_KEY</code>, or 
-                <code className="text-xs bg-yellow-100 px-1 rounded ml-1">VITE_GOOGLE_VISION_API_KEY</code>
-              </p>
-            </div>
-          )}
-          {hasExternalServices && availableServices[0] === 'OCR.space' && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
-              <p className="text-green-800 text-sm">
-                🎉 <strong>OCR.space API Active!</strong> You're using a premium OCR service for enhanced text recognition accuracy.
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Error Display */}
@@ -305,7 +313,7 @@ export const EnhancedGoogleLensSection: React.FC<EnhancedGoogleLensSectionProps>
                       <Loader className="w-5 h-5 text-blue-600" />
                     </motion.div>
                     <span className="font-bold text-blue-800 text-sm">
-                      {hasExternalServices ? 'Processing with AI...' : 'Extracting Text...'}
+                      {isOCRSpacePrimary ? '🚀 Processing with OCR.space...' : 'Processing with AI...'}
                     </span>
                   </div>
                   
@@ -325,20 +333,31 @@ export const EnhancedGoogleLensSection: React.FC<EnhancedGoogleLensSectionProps>
             {/* Processing Results */}
             {ocrResult && !isProcessing && (
               <motion.div
-                className="p-4 bg-green-50 rounded-xl border border-green-200 mb-4"
+                className={`p-4 rounded-xl border-2 mb-4 ${
+                  ocrResult.service.includes('OCR.space') 
+                    ? 'bg-green-50 border-green-200' 
+                    : 'bg-blue-50 border-blue-200'
+                }`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     {getServiceIcon(ocrResult.service)}
-                    <span className="font-semibold text-green-800">Processed by {ocrResult.service}</span>
+                    <span className={`font-semibold ${
+                      ocrResult.service.includes('OCR.space') ? 'text-green-800' : 'text-blue-800'
+                    }`}>
+                      Processed by {ocrResult.service}
+                    </span>
+                    {ocrResult.service.includes('OCR.space') && <Star className="w-4 h-4 text-green-600" />}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getConfidenceColor(ocrResult.confidence)}`}>
                       {Math.round(ocrResult.confidence * 100)}% confidence
                     </span>
-                    <span className="text-green-600 text-xs">
+                    <span className={`text-xs ${
+                      ocrResult.service.includes('OCR.space') ? 'text-green-600' : 'text-blue-600'
+                    }`}>
                       {ocrResult.processingTime}ms
                     </span>
                   </div>
